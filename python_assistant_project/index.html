@@ -1,0 +1,436 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>AI Code Generation & Debugging Assistant</title>
+  <link rel="stylesheet" href="style.css">
+  <link rel="preconnect" href="https://fonts.googleapis.com">
+  <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+  <link href="https://fonts.googleapis.com/css2?family=Plus+Jakarta+Sans:wght@400;500;600;700&family=JetBrains+Mono:wght@400;500;600&display=swap" rel="stylesheet">
+</head>
+<body>
+  <!-- Header / Nav Zone following Top Bar Contract -->
+  <header class="navbar">
+    <div class="nav-container">
+      <div class="brand">
+        <span class="brand-icon">⚡</span>
+        <span class="brand-name">AI Code Assistant</span>
+        <span class="brand-tag">Python Learning Lab</span>
+      </div>
+      <nav class="nav-links">
+        <a href="#assistant" class="nav-link active">Assistant</a>
+        <a href="#analyzer" class="nav-link">String Analyzer</a>
+        <a href="#split-bug" class="nav-link">Split Bug Demo</a>
+        <a href="#tests" class="nav-link">Test Cases</a>
+        <a href="#docs" class="nav-link">Documentation</a>
+      </nav>
+      <div class="nav-action">
+        <span class="status-indicator" id="apiStatusBadge">Backend Ready</span>
+      </div>
+    </div>
+  </header>
+
+  <main class="main-content">
+    <!-- Hero / Intro -->
+    <section class="hero-section">
+      <div class="hero-badge">Beginner-Friendly Python Studio</div>
+      <h1 class="hero-title">AI Code Generation & Debugging Assistant</h1>
+      <p class="hero-subtitle">
+        Write, explain, and debug Python code with instant feedback. Master fundamental programming concepts, string manipulation, and subtle pitfalls like Python's <code>split()</code> behavior.
+      </p>
+    </section>
+
+    <!-- SECTION 1: AI Code Assistant Workbench -->
+    <section id="assistant" class="workspace-card">
+      <div class="card-header">
+        <div>
+          <h2 class="card-title">Interactive Python Code Studio</h2>
+          <p class="card-desc">Enter your code below to explain or debug it, or describe a problem to generate new Python code.</p>
+        </div>
+        <div class="sample-chips">
+          <span class="chips-label">Quick Samples:</span>
+          <button type="button" class="chip-btn" data-sample="string_analyzer">String Analyzer</button>
+          <button type="button" class="chip-btn" data-sample="split_bug">Split Bug</button>
+          <button type="button" class="chip-btn" data-sample="syntax_err">Indentation Bug</button>
+          <button type="button" class="chip-btn" data-sample="palindrome">Palindrome Check</button>
+        </div>
+      </div>
+
+      <!-- Problem Prompt Box for Generation -->
+      <div class="prompt-box">
+        <label for="problemDescription" class="input-label">
+          Problem Description (For Code Generation)
+        </label>
+        <div class="input-row">
+          <input 
+            type="text" 
+            id="problemDescription" 
+            class="text-input" 
+            placeholder="e.g. Write a program to count words, non-space characters, and word frequency..."
+          />
+          <button type="button" id="btnGenerate" class="action-btn btn-generate">
+            <span class="btn-icon">✨</span> Generate Python Code
+          </button>
+        </div>
+      </div>
+
+      <!-- Code Editor Textarea -->
+      <div class="editor-container">
+        <div class="editor-header">
+          <span class="editor-tab">python_script.py</span>
+          <div class="editor-actions">
+            <button type="button" id="btnClearCode" class="secondary-btn">Clear</button>
+            <button type="button" id="btnCopyInput" class="secondary-btn">Copy</button>
+          </div>
+        </div>
+        <div class="editor-wrapper">
+          <textarea 
+            id="pythonCodeInput" 
+            class="code-textarea" 
+            spellcheck="false" 
+            placeholder="# Paste or type Python code here...
+def analyze_string(text):
+    words = text.split()
+    return len(words)"
+          ></textarea>
+        </div>
+      </div>
+
+      <!-- Main Action Buttons -->
+      <div class="actions-toolbar">
+        <div class="primary-actions">
+          <button type="button" id="btnExplain" class="action-btn btn-explain">
+            <span class="btn-icon">💡</span> Explain Code in Simple Words
+          </button>
+          <button type="button" id="btnDebug" class="action-btn btn-debug">
+            <span class="btn-icon">🐞</span> Identify & Debug Errors
+          </button>
+        </div>
+        <div id="loader" class="loader hidden">
+          <div class="spinner"></div>
+          <span id="loaderText">Analyzing code...</span>
+        </div>
+      </div>
+
+      <!-- Output Panels Container -->
+      <div id="outputContainer" class="output-container hidden">
+        <!-- Tab navigation for outputs -->
+        <div class="output-tabs">
+          <button type="button" class="tab-btn active" data-tab="tabGenerated">Generated Code</button>
+          <button type="button" class="tab-btn" data-tab="tabExplanation">Simple Explanation</button>
+          <button type="button" class="tab-btn" data-tab="tabDebug">Debugging & Fixes</button>
+        </div>
+
+        <!-- Panel 1: Generated Code -->
+        <div id="tabGenerated" class="output-panel active">
+          <div class="panel-header">
+            <h3 class="panel-title">Generated Python Code</h3>
+            <button type="button" id="btnCopyGenerated" class="secondary-btn">Copy Code</button>
+          </div>
+          <pre class="code-block"><code id="generatedCodeDisplay"># Click 'Generate Python Code' to see generated solution</code></pre>
+          <div id="generatedMeta" class="meta-box"></div>
+        </div>
+
+        <!-- Panel 2: Explanation -->
+        <div id="tabExplanation" class="output-panel">
+          <div class="panel-header">
+            <h3 class="panel-title">Plain English Explanation</h3>
+            <button type="button" id="btnCopyExplanation" class="secondary-btn">Copy Text</button>
+          </div>
+          <div id="explanationDisplay" class="explanation-content">
+            <p>Click 'Explain Code in Simple Words' to see a beginner-friendly breakdown of what the code does step-by-step.</p>
+          </div>
+        </div>
+
+        <!-- Panel 3: Debugging Suggestions -->
+        <div id="tabDebug" class="output-panel">
+          <div class="panel-header">
+            <h3 class="panel-title">Error Analysis & Suggestions</h3>
+            <button type="button" id="btnApplyFix" class="secondary-btn">Load Fix into Editor</button>
+          </div>
+          <div id="debugStatusBox" class="debug-status-box"></div>
+          <div id="debugDisplay" class="debug-content"></div>
+        </div>
+      </div>
+    </section>
+
+    <!-- SECTION 2: String Analysis Program & Live Interactive Lab (Req 7) -->
+    <section id="analyzer" class="workspace-card">
+      <div class="card-header">
+        <div>
+          <h2 class="card-title">Python String Analysis Program (Live Runner)</h2>
+          <p class="card-desc">Interactive execution of the string analysis program. Calculates word count, character count excluding spaces, and word frequencies in real time.</p>
+        </div>
+        <div class="badge-tag">Requirement 7</div>
+      </div>
+
+      <div class="analyzer-grid">
+        <div class="analyzer-input-col">
+          <label for="analyzerInputText" class="input-label">Enter Text to Analyze:</label>
+          <textarea 
+            id="analyzerInputText" 
+            class="analyzer-textarea" 
+            placeholder="Type any sentence, paragraph, or test string here..."
+          >Python is clean, Python is readable, and Python is beginner-friendly!</textarea>
+          
+          <div class="analyzer-btn-row">
+            <button type="button" id="btnAnalyzeString" class="action-btn btn-primary">
+              Run String Analysis
+            </button>
+            <button type="button" id="btnResetAnalyzer" class="secondary-btn">
+              Reset to Sample
+            </button>
+          </div>
+        </div>
+
+        <div class="analyzer-stats-col">
+          <div class="stat-card">
+            <span class="stat-label">Total Words</span>
+            <span id="statWordCount" class="stat-value">9</span>
+            <span class="stat-hint">Using robust split() delimiter</span>
+          </div>
+          <div class="stat-card">
+            <span class="stat-label">Characters (Excl. Spaces)</span>
+            <span id="statCharNoSpace" class="stat-value">59</span>
+            <span class="stat-hint">Excludes spaces, tabs & newlines</span>
+          </div>
+          <div class="stat-card">
+            <span class="stat-label">Total Characters</span>
+            <span id="statTotalChars" class="stat-value">68</span>
+            <span class="stat-hint">Raw character length with spaces</span>
+          </div>
+          <div class="stat-card">
+            <span class="stat-label">Unique Words</span>
+            <span id="statUniqueWords" class="stat-value">6</span>
+            <span class="stat-hint">Punctuation-stripped lowercase</span>
+          </div>
+        </div>
+      </div>
+
+      <!-- Word Frequency Distribution Table -->
+      <div class="frequency-section">
+        <h3 class="subsection-title">Word Frequency Distribution</h3>
+        <div id="frequencyTableContainer" class="frequency-table-container">
+          <!-- Populated by script.js -->
+        </div>
+      </div>
+    </section>
+
+    <!-- SECTION 3: The split(" ") vs split() Bug Showcase (Req 9) -->
+    <section id="split-bug" class="workspace-card bug-card">
+      <div class="card-header">
+        <div>
+          <h2 class="card-title">Bug Showcase: split(" ") vs split()</h2>
+          <p class="card-desc">
+            A common bug in beginner Python code: calling <code>text.split(" ")</code> with an explicit space instead of <code>text.split()</code>.
+          </p>
+        </div>
+        <div class="badge-tag bug-badge">Requirement 9</div>
+      </div>
+
+      <div class="bug-explainer">
+        <div class="explainer-card">
+          <h3 class="explainer-title">Why the Bug Happens</h3>
+          <p>
+            When you call <code>split(" ")</code> with a literal space string, Python splits strictly on every individual space. If there are two spaces in a row, Python splits between them and creates an <strong>empty string <code>""</code></strong> as a fake word! Furthermore, it fails to strip leading spaces, trailing spaces, tabs (<code>\t</code>), or newlines (<code>\n</code>).
+          </p>
+          <p>
+            When you call <code>split()</code> without arguments, Python automatically groups any sequence of contiguous whitespace into a single delimiter and strips leading/trailing whitespace.
+          </p>
+        </div>
+      </div>
+
+      <!-- Interactive Comparison Sandbox -->
+      <div class="sandbox-input-area">
+        <label for="splitBugInput" class="input-label">Test Input with Multiple Spaces & Tabs:</label>
+        <input 
+          type="text" 
+          id="splitBugInput" 
+          class="text-input" 
+          value="   Hello    World   Python   "
+        />
+        <button type="button" id="btnCompareSplit" class="action-btn btn-compare">
+          Compare split(" ") vs split()
+        </button>
+      </div>
+
+      <div class="comparison-grid">
+        <!-- Buggy Column -->
+        <div class="compare-col buggy-col">
+          <div class="compare-header">
+            <span class="tag-buggy">❌ Buggy Method: text.split(" ")</span>
+          </div>
+          <div class="compare-metric">
+            <span class="metric-label">Reported Words:</span>
+            <span id="buggyCount" class="metric-number text-red">14</span>
+          </div>
+          <div class="tokens-box">
+            <span class="tokens-label">Resulting Array Elements:</span>
+            <div id="buggyTokens" class="tokens-list"></div>
+          </div>
+          <p class="verdict-text text-red">
+            ⚠️ Contains empty strings <code>""</code> counted as phantom words!
+          </p>
+        </div>
+
+        <!-- Correct Column -->
+        <div class="compare-col correct-col">
+          <div class="compare-header">
+            <span class="tag-correct">✅ Correct Method: text.split()</span>
+          </div>
+          <div class="compare-metric">
+            <span class="metric-label">Reported Words:</span>
+            <span id="correctCount" class="metric-number text-green">3</span>
+          </div>
+          <div class="tokens-box">
+            <span class="tokens-label">Resulting Array Elements:</span>
+            <div id="correctTokens" class="tokens-list"></div>
+          </div>
+          <p class="verdict-text text-green">
+            🎯 Clean word list! All consecutive spaces collapsed and stripped.
+          </p>
+        </div>
+      </div>
+    </section>
+
+    <!-- SECTION 4: Automated Test Cases (Req 8) -->
+    <section id="tests" class="workspace-card">
+      <div class="card-header">
+        <div>
+          <h2 class="card-title">Automated Unit Test Cases</h2>
+          <p class="card-desc">Verify the correctness of the string analyzer functions across edge cases and standard text.</p>
+        </div>
+        <div class="badge-tag">Requirement 8</div>
+      </div>
+
+      <div class="tests-toolbar">
+        <button type="button" id="btnRunTests" class="action-btn btn-primary">
+          ▶ Run All Test Cases
+        </button>
+        <span id="testsSummary" class="tests-summary">3 of 3 Test Cases Ready</span>
+      </div>
+
+      <div class="test-cards-grid">
+        <!-- Test Case 1 -->
+        <div class="test-card" id="testCard1">
+          <div class="test-card-header">
+            <span class="test-name">Test Case 1: Standard Sentence</span>
+            <span class="test-badge badge-pending" id="badgeTest1">PENDING</span>
+          </div>
+          <p class="test-desc">Verifies standard word count and character calculation on a clean sentence.</p>
+          <div class="test-code-preview">
+            <code>"The quick brown fox jumps over the lazy dog."</code>
+          </div>
+          <div class="test-expectations">
+            <div>Expected Words: <strong>9</strong></div>
+            <div>Expected Non-Space Chars: <strong>36</strong></div>
+            <div>Expected 'the' Frequency: <strong>2</strong></div>
+          </div>
+          <div class="test-result-msg" id="msgTest1"></div>
+        </div>
+
+        <!-- Test Case 2 -->
+        <div class="test-card" id="testCard2">
+          <div class="test-card-header">
+            <span class="test-name">Test Case 2: Multi-Space & Whitespace Edge Case</span>
+            <span class="test-badge badge-pending" id="badgeTest2">PENDING</span>
+          </div>
+          <p class="test-desc">Tests that extra spaces, tabs, and newlines don't inflate the word count (Bug #9 defense).</p>
+          <div class="test-code-preview">
+            <code>"   Python     is   \n\t  very    fast!   "</code>
+          </div>
+          <div class="test-expectations">
+            <div>Expected Words: <strong>4</strong></div>
+            <div>Expected Non-Space Chars: <strong>17</strong></div>
+            <div>No empty string keys in word frequency</div>
+          </div>
+          <div class="test-result-msg" id="msgTest2"></div>
+        </div>
+
+        <!-- Test Case 3 -->
+        <div class="test-card" id="testCard3">
+          <div class="test-card-header">
+            <span class="test-name">Test Case 3: Punctuation & Case Normalization</span>
+            <span class="test-badge badge-pending" id="badgeTest3">PENDING</span>
+          </div>
+          <p class="test-desc">Verifies that casing is normalized and attached punctuation is stripped during frequency analysis.</p>
+          <div class="test-code-preview">
+            <code>"Code, code, CODE! Debug code often; debug early."</code>
+          </div>
+          <div class="test-expectations">
+            <div>Expected Words: <strong>8</strong></div>
+            <div>Expected 'code' Frequency: <strong>4</strong></div>
+            <div>Expected 'debug' Frequency: <strong>2</strong></div>
+          </div>
+          <div class="test-result-msg" id="msgTest3"></div>
+        </div>
+      </div>
+    </section>
+
+    <!-- SECTION 5: Security & Setup Documentation -->
+    <section id="docs" class="workspace-card">
+      <div class="card-header">
+        <div>
+          <h2 class="card-title">Setup & Secure API Configuration Guide</h2>
+          <p class="card-desc">Instructions for running this project in Visual Studio Code and securely configuring AI API keys.</p>
+        </div>
+        <div class="badge-tag">VS Code Ready</div>
+      </div>
+
+      <div class="docs-grid">
+        <div class="doc-card">
+          <h3 class="doc-title">1. How to Open in Visual Studio Code</h3>
+          <ol class="doc-list">
+            <li>Download or clone the project folder.</li>
+            <li>Open VS Code and choose <strong>File &gt; Open Folder...</strong> and select <code>python_assistant_project</code>.</li>
+            <li>To run the web interface directly, install the <strong>Live Server</strong> extension in VS Code, right-click <code>index.html</code>, and select <em>"Open with Live Server"</em>.</li>
+            <li>To run tests in the terminal: <code>python3 -m unittest test_string_analyzer.py</code>.</li>
+          </ol>
+        </div>
+
+        <div class="doc-card">
+          <h3 class="doc-title">2. Secure API Key Configuration (Never Hardcode!)</h3>
+          <p>
+            When connecting to Google Gemini AI API or any real Generative AI provider, <strong>never put API keys in client-side HTML/JS or hardcode them into git repositories</strong>.
+          </p>
+          <div class="security-steps">
+            <div class="step-item">
+              <span class="step-num">A</span>
+              <div>
+                <strong>Create a <code>.env</code> file:</strong> Add your key locally:
+                <code>GEMINI_API_KEY="your_api_key_here"</code>
+              </div>
+            </div>
+            <div class="step-item">
+              <span class="step-num">B</span>
+              <div>
+                <strong>Add <code>.env</code> to <code>.gitignore</code>:</strong> Prevents accidentally committing secrets to GitHub.
+              </div>
+            </div>
+            <div class="step-item">
+              <span class="step-num">C</span>
+              <div>
+                <strong>Use server-side proxy (Python Flask / Express):</strong> The backend reads <code>os.getenv("GEMINI_API_KEY")</code> securely and the browser only talks to <code>/api/ai/*</code>.
+              </div>
+            </div>
+          </div>
+        </div>
+      </div>
+    </section>
+  </main>
+
+  <footer class="footer">
+    <div class="footer-container">
+      <p class="footer-text">
+        <strong>AI Code Generation and Debugging Assistant</strong> &bull; Complete Student Python Project
+      </p>
+      <p class="footer-subtext">
+        Includes string analyzer, 3 unit tests, bug demonstration, and VS Code-ready structure.
+      </p>
+    </div>
+  </footer>
+
+  <script src="script.js"></script>
+</body>
+</html>

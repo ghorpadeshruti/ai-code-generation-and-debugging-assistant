@@ -1,0 +1,6 @@
+{
+  "name": "AI Code Generation and Debugging Assistant",
+  "description": "A beginner-friendly Python learning assistant with code generation, error debugging, plain-language code explanation, interactive string analysis, and split() edge case demonstration.",
+  "requestFramePermissions": [],
+  "majorCapabilities": ["MAJOR_CAPABILITY_SERVER_SIDE_GEMINI_API"]
+}
